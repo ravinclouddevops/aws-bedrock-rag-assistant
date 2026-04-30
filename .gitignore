@@ -1,6 +1,8 @@
 # Terraform
 **/.terraform/
-**/.terraform.lock.hcl
+# .terraform.lock.hcl is committed so provider versions are pinned in CI
+# Uncomment the line below only if you want to ignore it
+# **/.terraform.lock.hcl
 *.tfstate
 *.tfstate.backup
 *.tfplan

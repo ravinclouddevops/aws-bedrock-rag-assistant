@@ -17,6 +17,7 @@ env:
   TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
   TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
   TF_STATE_KEY: "bedrock-rag-assistant/dev/terraform.tfstate"
+  PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
 
 jobs:
   apply:
@@ -62,6 +63,17 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+      # Bedrock KB requires a Secrets Manager ARN with a valid value to connect to Pinecone.
+      # The secret shell is created by Terraform; this step writes the actual API key
+      # from the GitHub secret so the key never touches Terraform state.
+      - name: Populate Pinecone API key in Secrets Manager
+        run: |
+          SECRET_ARN=$(terraform output -raw pinecone_secret_arn)
+          aws secretsmanager put-secret-value \
+            --secret-id "$SECRET_ARN" \
+            --secret-string "{\"apiKey\":\"${{ secrets.PINECONE_API_KEY }}\"}"
+          echo "Pinecone API key written to $SECRET_ARN"
 
       - name: Output Summary
         if: success()

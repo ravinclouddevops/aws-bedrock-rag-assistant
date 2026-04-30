@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    pinecone = {
+      source  = "pinecone-io/pinecone"
+      version = "~> 0.7"
+    }
   }
 }
 
@@ -24,3 +28,7 @@ provider "aws" {
     }
   }
 }
+
+# API key is read from PINECONE_API_KEY env var — never hardcoded
+provider "pinecone" {}
+

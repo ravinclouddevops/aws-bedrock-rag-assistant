@@ -27,15 +27,16 @@ variable "kb_embedding_model_arn" {
   default     = "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"
 }
 
-variable "opensearch_standby_replicas" {
-  description = "Number of OpenSearch Serverless standby replicas (0 = dev, 2 = prod)"
-  type        = number
-  default     = 0
+variable "pinecone_index_name" {
+  description = "Pinecone index name for the KB vector store"
+  type        = string
+  default     = "bedrock-rag-kb"
+}
 
-  validation {
-    condition     = contains([0, 2], var.opensearch_standby_replicas)
-    error_message = "standby_replicas must be 0 (dev) or 2 (prod)."
-  }
+variable "titan_embedding_dimensions" {
+  description = "Titan Embeddings V2 output dimensions — must match the Pinecone index"
+  type        = number
+  default     = 1024
 }
 
 variable "bedrock_kb_role_arn" {

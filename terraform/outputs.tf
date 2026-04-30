@@ -8,14 +8,14 @@ output "s3_bucket_arn" {
   value       = aws_s3_bucket.kb_corpus.arn
 }
 
-output "opensearch_collection_endpoint" {
-  description = "OpenSearch Serverless collection endpoint"
-  value       = aws_opensearchserverless_collection.kb_vectors.collection_endpoint
+output "pinecone_index_host" {
+  description = "Pinecone index host — used as Bedrock KB connection string"
+  value       = pinecone_index.kb_vectors.host
 }
 
-output "opensearch_collection_arn" {
-  description = "ARN of the OpenSearch Serverless collection"
-  value       = aws_opensearchserverless_collection.kb_vectors.arn
+output "pinecone_secret_arn" {
+  description = "Secrets Manager ARN for the Pinecone API key — used by CI to populate the key"
+  value       = aws_secretsmanager_secret.pinecone_api_key.arn
 }
 
 output "bedrock_kb_id" {

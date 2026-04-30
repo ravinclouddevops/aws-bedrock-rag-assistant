@@ -179,10 +179,15 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Resource = ["arn:aws:s3:::${var.project_name}-corpus-*", "arn:aws:s3:::${var.project_name}-corpus-*/*"]
       },
       {
-        Sid    = "OpenSearchServerless"
+        Sid    = "SecretsManagerPinecone"
         Effect = "Allow"
-        Action = ["aoss:*"]
-        Resource = ["*"]
+        Action = [
+          "secretsmanager:CreateSecret", "secretsmanager:DeleteSecret",
+          "secretsmanager:DescribeSecret", "secretsmanager:GetSecretValue",
+          "secretsmanager:PutSecretValue", "secretsmanager:TagResource",
+          "secretsmanager:RestoreSecret"
+        ]
+        Resource = ["arn:aws:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-pinecone-key-*"]
       },
       {
         Sid    = "BedrockKnowledgeBase"

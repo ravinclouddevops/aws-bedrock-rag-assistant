@@ -3,6 +3,7 @@ locals {
   create_role  = var.bedrock_kb_role_arn == ""
 }
 
+data "aws_caller_identity" "current" {}
 data "aws_partition" "current" {}
 data "aws_region" "current" {}
 
@@ -83,20 +84,20 @@ resource "aws_iam_role_policy" "bedrock_kb_bedrock_models" {
   })
 }
 
-resource "aws_iam_role_policy" "bedrock_kb_opensearch" {
+resource "aws_iam_role_policy" "bedrock_kb_secrets" {
   count = local.create_role ? 1 : 0
 
-  name = "opensearch-serverless-access"
+  name = "pinecone-secret-read"
   role = aws_iam_role.bedrock_kb[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AOSSAPIAccess"
+        Sid    = "SecretsManagerRead"
         Effect = "Allow"
-        Action = ["aoss:APIAccessAll"]
-        Resource = [aws_opensearchserverless_collection.kb_vectors.arn]
+        Action = ["secretsmanager:GetSecretValue"]
+        Resource = [aws_secretsmanager_secret.pinecone_api_key.arn]
       }
     ]
   })
@@ -120,14 +121,13 @@ resource "aws_bedrockagent_knowledge_base" "rag_kb" {
   }
 
   storage_configuration {
-    type = "OPENSEARCH_SERVERLESS"
+    type = "PINECONE"
 
-    opensearch_serverless_configuration {
-      collection_arn    = aws_opensearchserverless_collection.kb_vectors.arn
-      vector_index_name = local.index_name
+    pinecone_configuration {
+      connection_string      = "https://${pinecone_index.kb_vectors.host}"
+      credentials_secret_arn = aws_secretsmanager_secret.pinecone_api_key.arn
 
       field_mapping {
-        vector_field   = "embedding"
         text_field     = "text"
         metadata_field = "metadata"
       }
@@ -137,8 +137,7 @@ resource "aws_bedrockagent_knowledge_base" "rag_kb" {
   depends_on = [
     aws_iam_role_policy.bedrock_kb_s3,
     aws_iam_role_policy.bedrock_kb_bedrock_models,
-    aws_iam_role_policy.bedrock_kb_opensearch,
-    aws_opensearchserverless_access_policy.kb_access,
+    aws_iam_role_policy.bedrock_kb_secrets,
   ]
 }
 
