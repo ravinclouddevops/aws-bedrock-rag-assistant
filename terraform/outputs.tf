@@ -8,6 +8,7 @@ output "s3_bucket_arn" {
   value       = aws_s3_bucket.kb_corpus.arn
 }
 
+
 output "pinecone_index_host" {
   description = "Pinecone index host — used as Bedrock KB connection string"
   value       = pinecone_index.kb_vectors.host
