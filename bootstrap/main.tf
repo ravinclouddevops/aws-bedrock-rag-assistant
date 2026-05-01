@@ -112,7 +112,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 locals {
   oidc_provider_arn = var.create_oidc_provider ? (
     aws_iam_openid_connect_provider.github[0].arn
-  ) : (
+    ) : (
     "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
   )
 }
@@ -128,10 +128,10 @@ resource "aws_iam_role" "github_actions" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid    = "GitHubOIDC"
-      Effect = "Allow"
+      Sid       = "GitHubOIDC"
+      Effect    = "Allow"
       Principal = { Federated = local.oidc_provider_arn }
-      Action = "sts:AssumeRoleWithWebIdentity"
+      Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
@@ -151,15 +151,15 @@ resource "aws_iam_role_policy" "github_actions_tfstate" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "StateS3"
-        Effect = "Allow"
-        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket"]
+        Sid      = "StateS3"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket"]
         Resource = [aws_s3_bucket.tf_state.arn, "${aws_s3_bucket.tf_state.arn}/*"]
       },
       {
-        Sid    = "StateLock"
-        Effect = "Allow"
-        Action = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:DescribeTable"]
+        Sid      = "StateLock"
+        Effect   = "Allow"
+        Action   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:DescribeTable"]
         Resource = [aws_dynamodb_table.tf_lock.arn]
       }
     ]
@@ -173,9 +173,9 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "S3Corpus"
-        Effect = "Allow"
-        Action = ["s3:*"]
+        Sid      = "S3Corpus"
+        Effect   = "Allow"
+        Action   = ["s3:*"]
         Resource = ["arn:aws:s3:::${var.project_name}-corpus-*", "arn:aws:s3:::${var.project_name}-corpus-*/*"]
       },
       {
@@ -190,9 +190,9 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Resource = ["arn:aws:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-pinecone-key-*"]
       },
       {
-        Sid    = "BedrockKnowledgeBase"
-        Effect = "Allow"
-        Action = ["bedrock:*"]
+        Sid      = "BedrockKnowledgeBase"
+        Effect   = "Allow"
+        Action   = ["bedrock:*"]
         Resource = ["*"]
       },
       {
